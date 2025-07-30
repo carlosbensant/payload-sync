@@ -1,0 +1,53 @@
+services:
+  # payload:
+  #   image: node:18-alpine
+  #   ports:
+  #     - '3000:3000'
+  #   volumes:
+  #     - .:/home/node/app
+  #     - node_modules:/home/node/app/node_modules
+  #   working_dir: /home/node/app/
+  #   command: sh -c "corepack enable && corepack prepare pnpm@latest --activate && pnpm install && pnpm dev"
+  #   depends_on:
+  #     - mongo
+  #     # - postgres
+  #   env_file:
+  #     - .env
+  postgres:
+    restart: always
+    image: postgres:latest
+    environment:
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=master
+      - POSTGRES_DB=ready
+      - PGADMIN_DEFAULT_EMAIL=info@ready.do
+      - PGADMIN_DEFAULT_PASSWORD=master
+      # Set timezone to match local machine
+      - TZ=UTC
+      - PGTZ=UTC
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      # Mount local timezone info (macOS/Linux)
+      - /etc/localtime:/etc/localtime:ro
+    ports:
+      - '5432:5432'
+
+  minio:
+    image: quay.io/minio/minio
+    ports:
+      - '9000:9000'
+      - '9001:9001'
+    environment:
+      MINIO_ROOT_USER: user123
+      MINIO_ROOT_PASSWORD: master123
+    volumes:
+      - miniodata:/data
+    command: server /data --console-address ":9001"
+
+# =============================================================================
+# Volumes
+# =============================================================================
+volumes:
+  # redis-data:
+  #   driver: local
+  pgdata:
